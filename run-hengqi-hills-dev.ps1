@@ -1,6 +1,6 @@
 $ErrorActionPreference = "Stop"
 
-$projectDir = Join-Path $PSScriptRoot "hengqi-hills"
+$projectDir = $PSScriptRoot
 $pkg = Join-Path $projectDir "package.json"
 
 if (-not (Test-Path $pkg)) {

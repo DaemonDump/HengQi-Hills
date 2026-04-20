@@ -1,7 +1,7 @@
 @echo off
 setlocal
 
-set "PROJECT_DIR=%~dp0hengqi-hills"
+set "PROJECT_DIR=%~dp0"
 
 if not exist "%PROJECT_DIR%\package.json" (
   echo [ERROR] Cannot find package.json:
