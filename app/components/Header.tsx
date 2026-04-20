@@ -51,7 +51,7 @@ export function Header() {
           <img
             src="/images/logo.png"
             alt="HengQi Hills"
-            className="h-8 w-8"
+            className="h-9 w-9 mt-1"
           />
           HengQi Hills
         </Link>
