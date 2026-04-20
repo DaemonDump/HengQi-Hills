@@ -1,0 +1,11 @@
+{
+  "name": "hengqi-hills-root",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix ./hengqi-hills run dev",
+    "build": "npm --prefix ./hengqi-hills run build",
+    "start": "npm --prefix ./hengqi-hills run start",
+    "lint": "npm --prefix ./hengqi-hills run lint",
+    "install:app": "npm --prefix ./hengqi-hills install"
+  }
+}
