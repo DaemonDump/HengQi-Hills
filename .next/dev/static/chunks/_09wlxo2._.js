@@ -912,6 +912,22 @@ var _s = __turbopack_context__.k.signature();
 ;
 ;
 ;
+function getNetworkInfo() {
+    const nav = navigator;
+    if (nav.connection) {
+        return {
+            effectiveType: nav.connection.effectiveType,
+            saveData: nav.connection.saveData
+        };
+    }
+    return {};
+}
+function shouldUseVideo() {
+    const networkInfo = getNetworkInfo();
+    if (networkInfo.saveData) return false;
+    if (networkInfo.effectiveType === "2g" || networkInfo.effectiveType === "3g") return false;
+    return true;
+}
 function HeroSection() {
     _s();
     const shouldReduceMotion = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$utils$2f$reduced$2d$motion$2f$use$2d$reduced$2d$motion$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useReducedMotion"])();
@@ -919,11 +935,57 @@ function HeroSection() {
     const [posterError, setPosterError] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
     const [videoReady, setVideoReady] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
     const [mounted, setMounted] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    const [shouldLoadVideo, setShouldLoadVideo] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    const [networkSlow, setNetworkSlow] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    const videoRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(null);
+    const hasLoadedVideo = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(false);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "HeroSection.useEffect": ()=>{
             setMounted(true);
+            const shouldVideo = shouldUseVideo();
+            setShouldLoadVideo(shouldVideo);
+            if (!shouldVideo) {
+                setNetworkSlow(true);
+                setVideoError(true);
+            }
         }
     }["HeroSection.useEffect"], []);
+    const handleVideoCanPlay = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
+        "HeroSection.useCallback[handleVideoCanPlay]": ()=>{
+            setVideoReady(true);
+        }
+    }["HeroSection.useCallback[handleVideoCanPlay]"], []);
+    const handleVideoError = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
+        "HeroSection.useCallback[handleVideoError]": ()=>{
+            if (!hasLoadedVideo.current) {
+                hasLoadedVideo.current = true;
+                setVideoError(true);
+                setVideoReady(false);
+            }
+        }
+    }["HeroSection.useCallback[handleVideoError]"], []);
+    const preloadVideo = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
+        "HeroSection.useCallback[preloadVideo]": ()=>{
+            if (videoRef.current && !hasLoadedVideo.current && shouldLoadVideo) {
+                videoRef.current.load();
+            }
+        }
+    }["HeroSection.useCallback[preloadVideo]"], [
+        shouldLoadVideo
+    ]);
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "HeroSection.useEffect": ()=>{
+            if (mounted) {
+                const timer = setTimeout(preloadVideo, 1000);
+                return ({
+                    "HeroSection.useEffect": ()=>clearTimeout(timer)
+                })["HeroSection.useEffect"];
+            }
+        }
+    }["HeroSection.useEffect"], [
+        mounted,
+        preloadVideo
+    ]);
     const contentVariants = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useMemo"])({
         "HeroSection.useMemo[contentVariants]": ()=>{
             return {
@@ -956,7 +1018,7 @@ function HeroSection() {
         }
     }["HeroSection.useMemo[contentVariants]"], []);
     const enableMotion = mounted && !shouldReduceMotion;
-    const showVideo = __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$config$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["APP_CONFIG"].heroMode === "video" && !videoError;
+    const showVideo = __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$config$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["APP_CONFIG"].heroMode === "video" && !videoError && shouldLoadVideo && !networkSlow;
     const showPoster = !posterError;
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("section", {
         id: "top",
@@ -990,21 +1052,22 @@ function HeroSection() {
                                     onError: ()=>setPosterError(true)
                                 }, void 0, false, {
                                     fileName: "[project]/app/sections/HeroSection.tsx",
-                                    lineNumber: 56,
+                                    lineNumber: 114,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/app/sections/HeroSection.tsx",
-                                lineNumber: 53,
+                                lineNumber: 111,
                                 columnNumber: 13
                             }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "absolute inset-0 bg-gradient-to-b from-black via-surface to-black"
                             }, void 0, false, {
                                 fileName: "[project]/app/sections/HeroSection.tsx",
-                                lineNumber: 67,
+                                lineNumber: 125,
                                 columnNumber: 13
                             }, this),
                             showVideo ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("video", {
+                                ref: videoRef,
                                 className: `absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${videoReady ? "opacity-100" : "opacity-0"}`,
                                 autoPlay: true,
                                 muted: true,
@@ -1012,38 +1075,38 @@ function HeroSection() {
                                 playsInline: true,
                                 preload: "auto",
                                 poster: __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$content$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["HERO_CONFIG"].poster,
-                                onCanPlay: ()=>setVideoReady(true),
-                                onError: ()=>setVideoError(true),
+                                onCanPlay: handleVideoCanPlay,
+                                onError: handleVideoError,
                                 children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("source", {
                                     src: __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$content$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["HERO_CONFIG"].src,
                                     type: "video/mp4"
                                 }, void 0, false, {
                                     fileName: "[project]/app/sections/HeroSection.tsx",
-                                    lineNumber: 82,
+                                    lineNumber: 141,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/app/sections/HeroSection.tsx",
-                                lineNumber: 71,
+                                lineNumber: 129,
                                 columnNumber: 13
                             }, this) : null
                         ]
                     }, void 0, true, {
                         fileName: "[project]/app/sections/HeroSection.tsx",
-                        lineNumber: 51,
+                        lineNumber: 109,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         className: "absolute inset-0 bg-black/40"
                     }, void 0, false, {
                         fileName: "[project]/app/sections/HeroSection.tsx",
-                        lineNumber: 86,
+                        lineNumber: 145,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/sections/HeroSection.tsx",
-                lineNumber: 45,
+                lineNumber: 103,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1063,7 +1126,7 @@ function HeroSection() {
                                 children: __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$content$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SITE_CONFIG"].nameEn.toUpperCase()
                             }, void 0, false, {
                                 fileName: "[project]/app/sections/HeroSection.tsx",
-                                lineNumber: 96,
+                                lineNumber: 155,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$render$2f$components$2f$motion$2f$proxy$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["motion"].h1, {
@@ -1074,7 +1137,7 @@ function HeroSection() {
                                 children: __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$content$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SITE_CONFIG"].name
                             }, void 0, false, {
                                 fileName: "[project]/app/sections/HeroSection.tsx",
-                                lineNumber: 105,
+                                lineNumber: 164,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$render$2f$components$2f$motion$2f$proxy$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["motion"].p, {
@@ -1085,7 +1148,7 @@ function HeroSection() {
                                 children: "Where Paths Diverge"
                             }, void 0, false, {
                                 fileName: "[project]/app/sections/HeroSection.tsx",
-                                lineNumber: 114,
+                                lineNumber: 173,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$render$2f$components$2f$motion$2f$proxy$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["motion"].div, {
@@ -1098,18 +1161,18 @@ function HeroSection() {
                                     children: "电竞 · 洗浴 · 桌游 · 胶囊住宿"
                                 }, void 0, false, {
                                     fileName: "[project]/app/sections/HeroSection.tsx",
-                                    lineNumber: 129,
+                                    lineNumber: 188,
                                     columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/app/sections/HeroSection.tsx",
-                                lineNumber: 123,
+                                lineNumber: 182,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/app/sections/HeroSection.tsx",
-                        lineNumber: 90,
+                        lineNumber: 149,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$render$2f$components$2f$motion$2f$proxy$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["motion"].a, {
@@ -1132,28 +1195,28 @@ function HeroSection() {
                             className: "h-5 w-5"
                         }, void 0, false, {
                             fileName: "[project]/app/sections/HeroSection.tsx",
-                            lineNumber: 152,
+                            lineNumber: 211,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/app/sections/HeroSection.tsx",
-                        lineNumber: 135,
+                        lineNumber: 194,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/sections/HeroSection.tsx",
-                lineNumber: 89,
+                lineNumber: 148,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/app/sections/HeroSection.tsx",
-        lineNumber: 44,
+        lineNumber: 102,
         columnNumber: 5
     }, this);
 }
-_s(HeroSection, "N6HZ8k8PmZEqXdW4B0OEiqxuWH4=", false, function() {
+_s(HeroSection, "MrlEx5hdzbh7Mv6GMV7I9Tm8yhA=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$utils$2f$reduced$2d$motion$2f$use$2d$reduced$2d$motion$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useReducedMotion"]
     ];

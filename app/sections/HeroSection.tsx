@@ -3,10 +3,33 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { APP_CONFIG } from "@/lib/config";
 import { HERO_CONFIG, SITE_CONFIG } from "@/lib/content";
+
+interface NetworkInformation {
+  effectiveType?: "2g" | "3g" | "4g";
+  saveData?: boolean;
+}
+
+function getNetworkInfo(): NetworkInformation {
+  const nav = navigator as Navigator & { connection?: NetworkInformation };
+  if (nav.connection) {
+    return {
+      effectiveType: nav.connection.effectiveType,
+      saveData: nav.connection.saveData
+    };
+  }
+  return {};
+}
+
+function shouldUseVideo(): boolean {
+  const networkInfo = getNetworkInfo();
+  if (networkInfo.saveData) return false;
+  if (networkInfo.effectiveType === "2g" || networkInfo.effectiveType === "3g") return false;
+  return true;
+}
 
 export function HeroSection() {
   const shouldReduceMotion = useReducedMotion();
@@ -14,10 +37,45 @@ export function HeroSection() {
   const [posterError, setPosterError] = useState(false);
   const [videoReady, setVideoReady] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
+  const [networkSlow, setNetworkSlow] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const hasLoadedVideo = useRef(false);
 
   useEffect(() => {
     setMounted(true);
+    const shouldVideo = shouldUseVideo();
+    setShouldLoadVideo(shouldVideo);
+    if (!shouldVideo) {
+      setNetworkSlow(true);
+      setVideoError(true);
+    }
   }, []);
+
+  const handleVideoCanPlay = useCallback(() => {
+    setVideoReady(true);
+  }, []);
+
+  const handleVideoError = useCallback(() => {
+    if (!hasLoadedVideo.current) {
+      hasLoadedVideo.current = true;
+      setVideoError(true);
+      setVideoReady(false);
+    }
+  }, []);
+
+  const preloadVideo = useCallback(() => {
+    if (videoRef.current && !hasLoadedVideo.current && shouldLoadVideo) {
+      videoRef.current.load();
+    }
+  }, [shouldLoadVideo]);
+
+  useEffect(() => {
+    if (mounted) {
+      const timer = setTimeout(preloadVideo, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [mounted, preloadVideo]);
 
   const contentVariants = useMemo(() => {
     return {
@@ -37,7 +95,7 @@ export function HeroSection() {
   }, []);
 
   const enableMotion = mounted && !shouldReduceMotion;
-  const showVideo = APP_CONFIG.heroMode === "video" && !videoError;
+  const showVideo = APP_CONFIG.heroMode === "video" && !videoError && shouldLoadVideo && !networkSlow;
   const showPoster = !posterError;
 
   return (
@@ -69,6 +127,7 @@ export function HeroSection() {
 
           {showVideo ? (
             <video
+              ref={videoRef}
               className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${videoReady ? "opacity-100" : "opacity-0"}`}
               autoPlay
               muted
@@ -76,8 +135,8 @@ export function HeroSection() {
               playsInline
               preload="auto"
               poster={HERO_CONFIG.poster}
-              onCanPlay={() => setVideoReady(true)}
-              onError={() => setVideoError(true)}
+              onCanPlay={handleVideoCanPlay}
+              onError={handleVideoError}
             >
               <source src={HERO_CONFIG.src} type="video/mp4" />
             </video>
